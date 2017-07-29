@@ -29,8 +29,11 @@ import org.openhab.binding.snapcast.internal.types.Client;
 import org.openhab.binding.snapcast.internal.types.Group;
 import org.openhab.binding.snapcast.internal.types.ServerStatus;
 import org.openhab.binding.snapcast.internal.types.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SnapcastController {
+    private Logger logger = LoggerFactory.getLogger(JsonRpcEventClient.class);
     private final JsonRpcEventClient client;
     private final Map<String, Client> clientMap = new HashMap<>();
     private final Map<String, Stream> streamMap = new HashMap<>();
@@ -53,11 +56,19 @@ public class SnapcastController {
         serverStatus.getServer();
         serverStatus.getGroups().forEach(g -> {
             groupMap.put(g.getId(), g);
-            g.getClients().forEach(c -> clientMap.put(c.getHost().getMac(), c));
+            g.getClients().forEach(c -> {
+                clientMap.put(c.getHost().getMac(), c);
+                logger.info("Found snapcast client: {}", c.getHost());
+            });
+            logger.info("Found snapcast group: {}", g.getName());
+
         });
 
         // serverStatus.getGroups().forEach(g -> g.getClients().forEach(c -> clientMap.put(c.getHost().getMac(), c)));
-        serverStatus.getStreams().forEach(s -> streamMap.put(s.getId(), s));
+        serverStatus.getStreams().forEach(s -> {
+            logger.info("Found snapcast stream: {}", s.getId());
+            streamMap.put(s.getId(), s);
+        });
     }
 
     @SuppressWarnings("unused")
